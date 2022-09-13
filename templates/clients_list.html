@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<!--Main layout-->
+  <main style="margin-top: 58px">
+    <div class="container pt-4">
+      <!-- Section: Main chart -->
+      <section class="mb-4">
+        <div class="card">
+          <div class="card-header py-3"> 
+            <div class="row float-right">
+              <div class="col-md-12 mb-4 ">
+            <a class="btn btn-dark" href="{% url 'createclient' %}" ><i class="fa fa-plus"></i> Add Client</a> 
+              </div>
+            </div>
+            <h5 class="mb-0 text-center"><strong>Clients</strong></h5>
+          </div>
+          <div class="card-body">              
+            <div class="row">
+              <div class="col-md-12 mb-4">
+                <form class="d-none d-md-flex input-group w-auto my-auto" action="{% url 'SearchClients' %}">
+                  <input autocomplete="off" type="search" class="form-control rounded"
+                    placeholder='Search Clients' name="q" style="min-width: 225px" />
+                  <span class="input-group-text border-0"><i class="fas fa-search"></i></span>
+              </form>
+              </div>
+            </div>
+          </div>
+      </section>
+      <!-- Section: Main chart -->
+
+      <!--Section: Sales Performance KPIs-->
+      <section class="mb-4">
+        <div class="card">
+          <div class="card-header text-center py-3">
+            <h5 class="mb-0 text-center">
+              <strong>Clients</strong>
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover text-nowrap">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Names</th>
+                    <th scope="col">National Id</th>
+                    <th scope="col">Loan Id</th>
+                    <th scope="col">Account Number</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for client in client_list.all %}
+                  <tr> 
+                    <th scope="row">{{forloop.counter}}</th>
+                    <th scope="row"><a class="" href="{% url 'clientprofile' client.id %}">{{client.first_name}} {{client.last_name}}</a></th>
+                    <td>{{client.national_id}}</td>
+                    <td>{{client.get_loan.account_no}}</td>
+                    <td>{{client.account_number}}</td>
+                    <td>{{client.get_loan.loan_amount}}</td>
+                    <td>{{client.status}}</td>
+                  </tr>
+                  {% endfor %}
+                  <tr>
+                    <th scope="row">Percentage change</th>
+                    <td>
+                      <span class="text-danger">
+                        <i class="fas fa-caret-down me-1"></i><span>-48.8%%</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>14.0%</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>46.4%</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>29.6%</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-danger">
+                        <i class="fas fa-caret-down me-1"></i><span>-11.5%</span>
+                      </span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Absolute change</th>
+                    <td>
+                      <span class="text-danger">
+                        <i class="fas fa-caret-down me-1"></i><span>-17,654</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>28</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>111</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-success">
+                        <i class="fas fa-caret-up me-1"></i><span>$1,092.72</span>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="text-danger">
+                        <i class="fas fa-caret-down me-1"></i><span>$-1.78</span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!--Section: Sales Performance KPIs-->
+    </div>
+  </main>
+  <!--Main layout-->
+  <!-- MDB -->
+{% endblock content %}

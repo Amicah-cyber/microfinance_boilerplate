@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+<!--content goes below-->
+<main style="margin-top: 58px">
+  <div class="container pt-4">
+      <!--form div starts below-->
+    <div class="card border-dark">
+      <div class="card-header h4 text-white bg-dark"><i class="fa fa-plus"></i> Create Loan Account</div>
+        <div class="card-body ps-4">
+          <form id="createloanform" class="" role="form" method="post">
+            {% csrf_token %}
+            <!--div 1 0f form-->
+             <div class="md-form">
+                  <input type="text" class="form-control" name="account_no" id="account_no" placeholder="Account Number *">
+              </div>
+              <label for="inputEmail3" class="black-text font-weight-light control-label">Interest Type<span>*</span></label>
+              <div class="">
+                  <select class="md-form" name="interest_type" id="interest_type" placeholder="Interest Type *">
+                    <option value="Flat">Flat</option>
+                    <option value="Declining">Declining</option>
+                </select>
+              </div>
+              <div class="md-form">
+                  <input type="text" class="form-control" name="loan_amount" id="loan_amount" placeholder="Loan Amount">
+              </div>
+              <label for="inputEmail3" class="black-text font-weight-light control-label">Client<span>*</span></label>
+               <div class="">          
+                    <select class="md-form mdb-select" name="client" id="client"> 
+                      {% for client in client_list %}                
+                      <option value="{{client.id}}">{{client}}</option>  
+                      {% endfor %}
+                    </select>
+              </div>
+              <label for="inputEmail3" class="black-text font-weight-light control-label">Payment Period<span>*</span></label>
+              <div class="">
+                  <select class="md-form" name="loan_repayment_period" id="loan_repayment_period" placeholder="Payment Period *">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                </select>
+              </div>
+              <label for="inputEmail3" class="black-text font-weight-light control-label">Payment Frequency<span>*</span></label>
+               <div class="">
+                  <select class="md-form" name="loan_repayment_every" id="loan_repayment_every">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                  </select>
+              </div>
+              <div class="md-form">
+                  <textarea class="form-control" name="loanpurpose_description" id="loanpurpose_description" rows="3" placeholder="Purpose Description"></textarea>
+              </div>
+              <div class="md-form">
+                  <input type="text" class="form-control" value="{{ user.username }}" name="created_by" id="created_by" placeholder="Created By *" readonly>
+              </div>
+            
+            <br clear="all" />
+            <!--branch 2 ends above-->
+            <!--btn row-->
+            <div class="btns-row">
+              <div class="form-group btns align-btns">
+                <button class="btn btn-success"><i class="fa fa-check padd"></i> Submit</button>
+                <button class="btn btn-dark " type="reset"><i class="fa fa-times padd"></i> Cancel</button>
+              </div>
+            </div>
+            <!--btn row ends above-->
+          </form>
+        </div>
+      
+      <!--form div ends above-->
+    </div>
+    <!--content ends above-->
+  </div>
+</main>
+<!--wrapper ends above-->
+{% endblock content %}
+{% block extra_js %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#createclientform').submit(function (e) {
+      e.preventDefault();
+      $("span.error").remove();
+      $.post('.', $('#createclientform').serialize(), function (data) {
+        if (data.error) {
+          $("span.error").remove();
+          $.each(data.errors, function( key, value ) {
+            if (key == 'date_of_birth'){
+              $('#datepicker-dob').after("<span class='error' style='height:11px;color:red;'> * " + value + "</span>");
+            }
+            if (key == 'joined_date'){
+              $('#date-picker-cc').after("<span class='error' style='height:11px;color:red;'> * " + value + "</span>");
+            }
+            else{
+              $('#'+key).after("<span class='error' style='height:11px;color:red;'> * " + value + "</span>");
+            }
+          });
+        }
+        else {
+          alert("Member created sucessfully.");
+          window.location = data.success_url;
+        }
+      }, "json");
+    });
+    $('.cancel-btn').click(function (e) {
+      $("span.error").remove();
+    });
+  });
+</script>
+{% endblock extra_js %}
