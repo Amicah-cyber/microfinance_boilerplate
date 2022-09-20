@@ -139,7 +139,6 @@ def client_profile_view(request, pk):
     client = get_object_or_404(Client, id=pk)
     return render(request, "client/profile.html", {'client': client})
 
-
 def update_client_view(request, pk):
     form = ClientForm()
     client_obj = get_object_or_404(Client, id=pk)
@@ -184,13 +183,13 @@ def clients_list_view(request):
     if request.user.is_authenticated:
         user=request.user
         if user.is_active and user.is_staff and user.user_roles=='LoanOfficer':
-            client_list = Client.objects.filter(created_by=user)
+            client_list = Client.objects.filter(is_active=True,created_by=user)
             return render(request, "clients_list.html", {'client_list': client_list})
         elif user.is_active and user.is_staff and user.user_roles=='Supervisor':
-            client_list = Client.objects.all()
+            client_list = Client.objects.filter(is_active=True).all()
             return render(request, "clients_list.html", {'client_list': client_list})
         elif user.is_active and user.is_staff and user.user_roles=='OfficeAdmin':
-            client_list = Client.objects.filter(created_by=user)
+            client_list = Client.objects.filter(is_active=True).all()
             return render(request, "clients_list.html", {'client_list': client_list})
         else:
             client_list=None
@@ -215,20 +214,15 @@ def client_inactive_view(request, pk):
         count = 0
         loans = LoanAccount.objects.filter(client=client)
         if loans:
-            if loans and loans.count() != loans.filter(total_loan_balance=0).count():
-                raise Http404("Oops! Member is involved in loan, Unable to delete.")
-            else:
-                    client.is_active = False
-                    client.save()
-                    # return HttpResponseRedirect(reverse("micro_admin:viewclient")
             for loan in loans:
                 if loan.total_loan_balance == 0:
                     count += 1
-                    if count == loans.count():
-                        client.is_active = False
-                        client.save()
+                if count == loans.count():
+                    client.is_active = False
+                    client.save()
+                    return HttpResponseRedirect(reverse("clientprofile"))
                 else:
-                    raise Http404("Oops! Member is involved in loan, Unable to delete.")
+                    messages.error(request,"Oops! Member is involved in a loan, Unable to delete.")
         else:
             client.is_active = False
             client.save()
@@ -271,7 +265,7 @@ def create_loanaccount(request):
                     loan_amount = loan_amount - n
                     print(interest_charged)
                 loan.interest_charged =  interest_charged
-            
+            loan.total_loan_balance = loan.loan_amount + loan.interest_charged
             if request.POST.get('client'):
                 client_id= request.POST.get('client')
                 loan.client = Client.objects.get(id=client_id)
@@ -284,7 +278,7 @@ def create_loanaccount(request):
 
 def delete_loanaccount(request,pk):
     loan =  LoanAccount.objects.get(id=pk)
-    print(loan)
+    loan.delete()
     return HttpResponseRedirect(reverse('loans'))
     
 def show_allloandets(request,pk):
@@ -295,13 +289,9 @@ def show_allloandets(request,pk):
     return render(request,'loan/loan_profile.html',context)
 
 def update_loan_view(request, pk):
-    loanform=modelform_factory(LoanAccount,form=LoanAccountForm,exclude=('client',))
+    #loanform=modelform_factory(LoanAccount,form=LoanAccountForm,exclude=('client',))
     loan_obj = get_object_or_404(LoanAccount, id=pk)
-    form = loanform(instance=loan_obj)
-    #queryset = LoanAccount.objects.filter(id=pk)
-    #formset = LoanAccountFormset(queryset=queryset)
-    #print(formset)
-    #forms = formset[0]
+    #form = loanform(instance=loan_obj)
     if request.method == 'POST':
         form = LoanAccountForm(request.POST, instance=loan_obj)
         if form.is_valid():
@@ -318,11 +308,12 @@ def update_loan_view(request, pk):
                     loan_amount = loan_amount - n
                     print(interest_charged)
                 loan.interest_charged =  interest_charged
+            loan.total_loan_balance = loan.loan_amount + loan.interest_charged
             loan.save()
             return HttpResponseRedirect(reverse('loandetails', kwargs={"pk": loan.id}))
         else:
             return JsonResponse({"error": True, "errors": form.errors})
-    return render(request, "loan/edit.html", {'loan':loan_obj, 'form':form})
+    return render(request, "loan/edit.html", {'loan':loan_obj})
 
 ###-------------USER MANAGEMENT---------###
 def create_user_view(request):

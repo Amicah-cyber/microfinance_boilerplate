@@ -5,16 +5,74 @@
 <main style="margin-top: 58px">
   <div class="container pt-4">
     <form method="POST" action="">
-     {% csrf_token %}
-      {{form | crispy}}
-      <div class="btns-row">
-        <div class="form-group btns align-btns">
-         <button class="btn btn-success"><i class="fa fa-check padd"></i> Submit</button>
-         <button class="btn btn-dark " type="reset"><i class="fa fa-times padd"></i> Cancel</button>
+    {% csrf_token %}
+    <div id="div_id_account_no" class="form-group" hidden>
+        <label for="id_account_no" class="requiredField">Account no<span class="asteriskField">*</span></label>
+        <div>
+        <input type="text" name="account_no" value="{{loan.account_no}}" maxlength="50" 
+        class="textinput textInput form-control" required="" id="id_account_no"/>
         </div>
-      </div>
+    </div>
+    <div id="div_id_client" class="form-group" hidden>       
+        <div class="div_id_client" hidden>          
+            <select class="md-form mdb-select" name="client" id="client">                
+                <option value="{{loan.client.id}}">{{loan.client}}</option>  
+            </select>
+        </div>
+    </div>
+    </div>
+    <div id="div_id_interest_type" class="form-group">
+        <label for="id_interest_type" class="requiredField">
+        Interest type<span class="asteriskField">*</span>
+        </label>
+        <div>
+        <select name="interest_type" class="select form-control" required=""id="id_interest_type">
+            <option value="">---------</option>
+            <option value="Flat">Flat</option>
+            <option value="Declining" selected="">Declining</option>
+        </select>
+        </div>
+    </div>
+    <div id="div_id_interest_rate" class="form-group">
+        <label for="id_interest_rate" class="requiredField">Interest rate<span class="asteriskField">*</span></label>
+        <div>
+        <input type="number" name="interest_rate" value="{{loan.interest_rate}}" step="0.01" class="numberinput form-control" required="" id="id_interest_rate"/>
+        </div>
+    </div>
+    <div id="div_id_loan_amount" class="form-group">
+        <label for="id_loan_amount" class="requiredField">
+        Loan amount<span class="asteriskField">*</span>
+        </label>
+        <div>
+        <input type="number" name="loan_amount" value="{{loan.loan_amount}}" step="0.000001" class="numberinput form-control" required="" id="id_loan_amount"/>
+        </div>
+    </div>
+    <div id="div_id_loan_repayment_period" class="form-group">
+        <label for="id_loan_repayment_period" class="requiredField">Loan repayment period<span class="asteriskField">*</span></label>
+        <div>
+        <input type="number" name="loan_repayment_period" value="{{loan.loan_repayment_period}}" class="numberinput form-control" required="" id="id_loan_repayment_period"/>
+        </div>
+    </div>
+    <div id="div_id_loan_repayment_every" class="form-group">
+        <label for="id_loan_repayment_every" class="requiredField"> Loan repayment every<span class="asteriskField">*</span></label>
+        <div> <input type="number" name="loan_repayment_every" value="{{loan.loan_repayment_every}}" class="numberinput form-control" 
+            required="" id="id_loan_repayment_every"/>
+        </div>
+    </div>
+    <div id="div_id_loanpurpose_description" class="form-group">
+        <label for="id_loanpurpose_description" class="requiredField"> Loanpurpose description<span class="asteriskField">*</span> </label>
+        <div> <textarea name="loanpurpose_description" cols="40" rows="10" class="textarea form-control" required="" 
+            id="id_loanpurpose_description" spellcheck="false">{{loan.loanpurpose_description}}</textarea>
+        </div>
+    </div>
+
+    <div class="btns-row">
+        <div class="form-group btns align-btns">
+        <button class="btn btn-success"> <i class="fa fa-check padd"></i> Submit </button>
+        <button class="btn btn-dark" type="reset"><i class="fa fa-times padd"></i> Cancel </button>
+        </div>
+    </div>
     </form>
-    
-  </div>
+ </div>
 </main>
 {% endblock content %}

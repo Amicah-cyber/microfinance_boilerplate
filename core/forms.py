@@ -140,7 +140,7 @@ class LoanAccountForm(forms.ModelForm):
     
     class Meta:
         model = LoanAccount
-        fields = ["account_no", "interest_type","interest_rate", "loan_amount",'client',
+        fields = ["account_no", "interest_type","interest_rate", "loan_amount","client",
                   "loan_repayment_period", "loan_repayment_every","loanpurpose_description"]
 
     def clean_loan_repayment_period(self):
