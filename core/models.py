@@ -51,6 +51,11 @@ PAYMENT_TYPES = (
     ('LoanProcessingFee', 'LoanProcessingFee'),
     ('Penalty', 'Penalty'),
 )
+PAYMENT_METHODS = (
+    ('Paypal','Paypal'),
+    ('Stripe','Stripe'),
+    ('Payoneer','Payoneer')
+)
 
 
 
@@ -124,6 +129,10 @@ class User(AbstractBaseUser,PermissionsMixin):
         permissions = (
             ("OfficeAdmin",
              "Can manage all users accounts."),
+            ("Add_user","Can add user accounts."),
+            ("edit_clients","Can edit client accounts."),
+            ("view_clients","Can view client accounts."),
+            ("manage_clients","Can manage client accounts."),
         )
 
 
@@ -190,6 +199,7 @@ class LoanAccount(models.Model):
     loan_repayment_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True)
     total_loan_amount_repaid = models.DecimalField(max_digits=19, decimal_places=6, default=0)
     loanpurpose_description = models.TextField()
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     interest_charged = models.DecimalField(max_digits=19, decimal_places=6, default=0)
     total_interest_repaid = models.DecimalField(max_digits=19, decimal_places=6, default=0)
     total_loan_paid = models.DecimalField(max_digits=19, decimal_places=6, default=0)
@@ -209,15 +219,10 @@ class Receipts(models.Model):
     date = models.DateField()
     receipt_number = models.CharField(max_length=50, unique=True)
     client = models.ForeignKey(Client, null=True, blank=True,on_delete=models.PROTECT)
-    member_loan_account = models.ForeignKey(LoanAccount, null=True, blank=True,on_delete=models.PROTECT)
-    group_loan_account = models.ForeignKey(LoanAccount, null=True, blank=True, related_name="group_loan_account",on_delete=models.PROTECT)
-    sharecapital_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     entrancefee_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     membershipfee_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     bookfee_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     loanprocessingfee_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
-    savingsdeposit_thrift_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
-    fixeddeposit_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     recurringdeposit_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     loanprinciple_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     loaninterest_amount = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
@@ -237,9 +242,11 @@ class Receipts(models.Model):
 
 class Payments(models.Model):
     date = models.DateField()
+    payment_id = models.CharField(max_length=50, unique=True)
     client = models.ForeignKey(Client, null=True, blank=True,on_delete=models.PROTECT)
     staff = models.ForeignKey(User, null=True, blank=True,on_delete=models.PROTECT)
     payment_type = models.CharField(choices=PAYMENT_TYPES, max_length=25)
+    payment_method = models.CharField(choices=PAYMENT_METHODS, max_length=25)
     amount = models.DecimalField(max_digits=19, decimal_places=6)
     interest = models.DecimalField(max_digits=19, decimal_places=6, null=True, blank=True, default=0)
     total_amount = models.DecimalField(max_digits=19, decimal_places=6)

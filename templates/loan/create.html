@@ -10,19 +10,25 @@
           <form id="createloanform" class="" role="form" method="post">
             {% csrf_token %}
             <!--div 1 0f form-->
-             <div class="md-form">
+              <div class="md-form">
                   <input type="text" class="form-control" name="account_no" id="account_no" placeholder="Account Number *">
               </div>
               <label for="inputEmail3" class="black-text font-weight-light control-label">Interest Type<span>*</span></label>
-              <div class="">
-                  <select class="md-form" name="interest_type" id="interest_type" placeholder="Interest Type *">
+              <div class="md-form">
+                  <select class="" name="interest_type" id="interest_type" placeholder="Interest Type *">
                     <option value="Flat">Flat</option>
                     <option value="Declining">Declining</option>
                 </select>
               </div>
+              <label for="inputEmail3" class="black-text font-weight-light form-label">Interest Rate<span>*</span></label>
+              <div class="md-form">
+                  <input type="number" class="numberinput form-control" step="0.5" value="5" name="interest_rate" id="interest_rate">
+              </div> 
+
               <div class="md-form">
                   <input type="text" class="form-control" name="loan_amount" id="loan_amount" placeholder="Loan Amount">
               </div>
+              
               <label for="inputEmail3" class="black-text font-weight-light control-label">Client<span>*</span></label>
                <div class="">          
                     <select class="md-form mdb-select" name="client" id="client"> 
@@ -32,18 +38,12 @@
                     </select>
               </div>
               <label for="inputEmail3" class="black-text font-weight-light control-label">Payment Period<span>*</span></label>
-              <div class="">
-                  <select class="md-form" name="loan_repayment_period" id="loan_repayment_period" placeholder="Payment Period *">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                </select>
-              </div>
+              <div class="md-form">
+                <input type="number" class="numberinput form-control" value="4" name="loan_repayment_period" id="loan_repayment_period">
+              </div> 
               <label for="inputEmail3" class="black-text font-weight-light control-label">Payment Frequency<span>*</span></label>
-               <div class="">
-                  <select class="md-form" name="loan_repayment_every" id="loan_repayment_every">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                  </select>
+               <div class="md-form">
+                <input type="number" class="numberinput form-control" value="1" max="3" name="loan_repayment_every" id="loan_repayment_every">
               </div>
               <div class="md-form">
                   <textarea class="form-control" name="loanpurpose_description" id="loanpurpose_description" rows="3" placeholder="Purpose Description"></textarea>

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<!--Main layout-->
+<main style="margin-top: 58px">
+  <div class="container pt-4">
+    <form action="">
+    <p class="fw-bold mb-4 pb-2">Payments:</p>
+        <div class="row mb-4">
+         <div class="col-7">
+          <div class="form-outline mb-4">
+            <label class="form-label" for="formControlLgXsd">Client's Name</label>
+            <input type="text" id="formControlLgXsd" class="form-control border border-dark"/>      
+          </div>
+         </div>
+         <div class="col-5">
+          <div class="form-outline mb-4">
+            <label class="form-label" for="formControlLgXsd">Loan Account</label>
+            <input type="text" id="formControlLgXsd" class="form-control border border-dark"/>      
+          </div>
+         </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-5 ">
+                <div class="form-outline">
+                    <label class="form-label" for="formControlLgXM8">Amount</label>
+                <input type="text" id="formControlLgXM8" class="form-control border border-dark"/> 
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-outline">
+                 <label class="form-label" for="formControlLgXM8">Interest</label>
+                 <input type="text" id="formControlLgXM8" class="form-control border border-dark"/> 
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-outline">
+                 <label class="form-label" for="formControlLgcvv">Total Amount</label>
+                 <input type="text" id="formControlLgcvv" class="form-control border border-dark"/>
+                </div>
+            </div>
+        </div>
+
+            <div class="row mb-4">
+            <div class="col-5">
+                <div class="form-outline">
+                <label class="form-label" for="formControlLgExpk">Payment Id</label>
+                 <input type="text" id="formControlLgExpk" class="form-control border border-dark"/>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="form-outline">
+
+                <label class="form-label" for="formControlLgXM8">Payment Method</label>
+                <select type="text" id="formControlLgXM8" class="form-control border border-dark">
+                    <option value="Paypal">Paypal</option>
+                    <option value="Stripe">Stripe</option>
+                    <option value="Payoneer">Payoneer</option>
+                </select>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="form-outline">
+                <label class="form-label" for="formControlLgXM8">Payment Type</label>
+                <select type="text" id="formControlLgXM8" class="form-control border border-dark">
+                    <option value="Loans">Loan Payment</option>
+                    <option value="LoanProcessingFee">Loan Processing Fee</option>
+                    <option value="Penalty">Penalty</option>
+                </select>
+                </div>
+            </div>
+            </div>
+
+            <button class="btn btn-success btn-lg btn-block">PAY</button>
+        </form>
+
+    </div>
+</main>
+
+_{% endblock content %}

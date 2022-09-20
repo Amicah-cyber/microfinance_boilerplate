@@ -1,9 +1,10 @@
 from http import client
 from multiprocessing import context
+from os import PRIO_USER
 import re
 import decimal
 from core import urls
-from .models import ACCOUNT_STATUS, LoanAccount,Client,Payments,Receipts, User
+from .models import ACCOUNT_STATUS, LoanAccount,Client,Payments,Receipts, User,USER_ROLES
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, get_object_or_404, redirect
@@ -20,6 +21,7 @@ from django.contrib.auth.models import Permission, ContentType
 # from weasyprint import HTML, CSS
 from django.template.loader import get_template
 from django.urls import reverse
+from django.forms import modelformset_factory,inlineformset_factory,modelform_factory
 
 from.forms import (ClientForm,UserForm,LoanAccountForm,ChangePasswordForm,PaymentForm,ReceiptForm,UpdateClientProfileForm)
 
@@ -38,25 +40,19 @@ def loginPage(request):
             messages.error(request, 'User does not exist.')
 
         user = authenticate(username=username, password=password)
-        print(username + password)
         print(user)
-        #if user is not None:
         if user is not None:
             login(request, user)
             return redirect('home')
-            #return reverse('home')
         else:
-            messages.error(request, 'Username or password does not exist.')
-        
-        #else:
-          #  messages.error(request, 'Username or password does not exist.')
-            
+            messages.error(request, 'Username or password does not exist.')   
     context = {'page': page}
     return render(request, 'login.html', context)
 
 def logoutUser(request):
     logout(request)
     return redirect('home')
+
 def registerPage(request):
     page='register'
     form= ClientForm()
@@ -70,9 +66,9 @@ def registerPage(request):
             return redirect('home')
         else:
             messages.error(request,'An error occured during registration')
-            
-    #context = {'page': page}
     return render(request, 'login.html', {'form': form})
+
+
 @login_required(login_url ='login')
 def home(request):
     if request.user.is_authenticated:
@@ -80,11 +76,11 @@ def home(request):
         if user.is_active and user.is_staff: 
             loans=LoanAccount.objects.filter(created_by=request.user) 
             loans_count=LoanAccount.objects.filter(created_by=request.user).count()
-            pending_loans_A = LoanAccount.objects.filter(status='Applied').aggregate(Sum('loan_amount'))
-            pending_loans_T = LoanAccount.objects.filter(status='Applied').count()
-            disbursed_loans = LoanAccount.objects.filter(status='Approved').aggregate(Sum('loan_amount'))
-            disbursed_loans_T = LoanAccount.objects.filter(status='Approved').count()
-            loan_amount=LoanAccount.objects.aggregate(Sum('loan_amount'))
+            pending_loans_A = LoanAccount.objects.filter(status='Applied',created_by=request.user).aggregate(Sum('loan_amount'))
+            pending_loans_T = LoanAccount.objects.filter(status='Applied',created_by=request.user).count()
+            disbursed_loans = LoanAccount.objects.filter(status='Approved',created_by=request.user).aggregate(Sum('loan_amount'))
+            disbursed_loans_T = LoanAccount.objects.filter(status='Approved',created_by=request.user).count()
+            loan_amount=LoanAccount.objects.filter(created_by=request.user).aggregate(Sum('loan_amount'))
             staff_count = User.objects.count()
             clients_count = Client.objects.filter(created_by=request.user).count()
             clients = Client.objects.filter(created_by=request.user)
@@ -115,24 +111,14 @@ def home(request):
         return render(request, "admin.html", context)
     return render(request, "login.html")
 
-def loans(request):
-    if request.user.is_authenticated:
-        #client_list = Client.objects.filter(created_by=request.user)
-        loans=LoanAccount.objects.filter(created_by=request.user)
-        context={
-            'loans':loans,
-        } 
-    return render(request,'loans_list.html',context)
 
-def adminview(request):
-    return render(request,'admin.html')
 
 def logoutUser(request):
     logout(request)
     return redirect('home')
 
 
-    
+####----- CLIENT MANAGEMENT -----####
 def create_client_view(request):
     form = ClientForm()
     if request.method == 'POST':
@@ -221,6 +207,8 @@ class SearchClientsView(ListView):
         )
         return client_list
 
+
+
 def client_inactive_view(request, pk):
     client = get_object_or_404(Client, id=pk)
     if client.is_active:
@@ -246,6 +234,17 @@ def client_inactive_view(request, pk):
             client.save()
     return HttpResponseRedirect(reverse("viewclient"))
 
+####-----LOAN  MANAGEMENT-----####
+
+def loans(request):
+    if request.user.is_authenticated:
+        #client_list = Client.objects.filter(created_by=request.user)
+        loans=LoanAccount.objects.filter(created_by=request.user)
+        context={
+            'loans':loans,
+        } 
+    return render(request,'loans_list.html',context)
+
 def create_loanaccount(request):
     form = LoanAccountForm()
     client_list = Client.objects.filter(created_by=request.user)
@@ -256,24 +255,179 @@ def create_loanaccount(request):
         form = LoanAccountForm(request.POST)
         if form.is_valid():
             loan = form.save(commit=False)
+            print(loan)
             loan.created_by = request.user
             loan.status='Applied'
-            loan.interest_charged = (loan.loan_amount*decimal.Decimal(0.05)*2)
+            interest_charged=0
+            loan_amount= loan.loan_amount
+            print(loan.interest_rate)
+            if loan.interest_rate is not None:
+                i=decimal.Decimal(loan.interest_rate)
+                principle=[]
+                n = loan_amount/loan.loan_repayment_period
+                for x in range(0,loan.loan_repayment_period,loan.loan_repayment_every):
+                    interest_charged += (i/100 * loan_amount)
+                    principle.append(interest_charged+loan_amount)
+                    loan_amount = loan_amount - n
+                    print(interest_charged)
+                loan.interest_charged =  interest_charged
             
             if request.POST.get('client'):
                 client_id= request.POST.get('client')
                 loan.client = Client.objects.get(id=client_id)
-            print(request.POST.get('client'))
             loan.loanprocessingfee_amount = 300
             loan.save()
-            print(JsonResponse({
-                "error": False,
-                "success_url": reverse('loans')
-            }))
             return HttpResponseRedirect(reverse('loans'))
         else:
             return JsonResponse({"error": True, "errors": form.errors})
     return render(request, "loan/create.html",context)
 
+def delete_loanaccount(request,pk):
+    loan =  LoanAccount.objects.get(id=pk)
+    print(loan)
+    return HttpResponseRedirect(reverse('loans'))
+    
+def show_allloandets(request,pk):
+    loan=LoanAccount.objects.get(id=pk)
+    context={
+        'loan':loan
+    }
+    return render(request,'loan/loan_profile.html',context)
+
+def update_loan_view(request, pk):
+    loanform=modelform_factory(LoanAccount,form=LoanAccountForm,exclude=('client',))
+    loan_obj = get_object_or_404(LoanAccount, id=pk)
+    form = loanform(instance=loan_obj)
+    #queryset = LoanAccount.objects.filter(id=pk)
+    #formset = LoanAccountFormset(queryset=queryset)
+    #print(formset)
+    #forms = formset[0]
+    if request.method == 'POST':
+        form = LoanAccountForm(request.POST, instance=loan_obj)
+        if form.is_valid():
+            loan = form.save(commit=False)
+            interest_charged=0
+            loan_amount= loan.loan_amount
+            if loan.interest_rate is not None:
+                i=decimal.Decimal(loan.interest_rate)
+                principle=[]
+                n = loan_amount/loan.loan_repayment_period
+                for x in range(0,loan.loan_repayment_period,loan.loan_repayment_every):
+                    interest_charged += (i/100 * loan_amount)
+                    principle.append(interest_charged+loan_amount)
+                    loan_amount = loan_amount - n
+                    print(interest_charged)
+                loan.interest_charged =  interest_charged
+            loan.save()
+            return HttpResponseRedirect(reverse('loandetails', kwargs={"pk": loan.id}))
+        else:
+            return JsonResponse({"error": True, "errors": form.errors})
+    return render(request, "loan/edit.html", {'loan':loan_obj, 'form':form})
+
+###-------------USER MANAGEMENT---------###
+def create_user_view(request):
+    contenttype = ContentType.objects.get_for_model(request.user)
+    print(contenttype)
+    permissions = Permission.objects.filter(content_type_id=contenttype, codename__in=["OfficeAdmin","edit_clients","Add_user","view_clients","manage_clients"])
+    form = UserForm()
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            if len(request.POST.getlist("user_permissions")):
+                user.user_permissions.add(*request.POST.getlist("user_permissions"))
+            if request.POST.get("user_roles") == "OfficeAdmin":
+                if not user.user_permissions.filter(id__in=request.POST.getlist("user_permissions")).exists():
+                    user.user_permissions.add(Permission.objects.get(codename="OfficeAdmin"))
+            return HttpResponseRedirect(reverse("userprofile",kwargs={"pk": user.id}))
+        else:
+            return JsonResponse({"error": True, "errors": form.errors})
+
+    return render(request, "user/create.html", {
+        'form': form, 'userroles': USER_ROLES, 'permissions': permissions})
+    
+
+def update_user_view(request, pk):
+    contenttype = ContentType.objects.get_for_model(request.user)
+    permissions = Permission.objects.filter(content_type_id=contenttype, codename__in=["OfficeAdmin","edit_clients","Add_user","view_clients","manage_clients"])
+    form = UserForm()
+    selected_user = User.objects.get(id=pk)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=selected_user)
+        if form.is_valid():
+            if not (
+               request.user.is_admin or request.user == selected_user or
+               (
+                   request.user.has_perm("OfficeAdmin") and
+                   request.user.branch == selected_user.branch
+               )):
+                return JsonResponse({
+                    "error": True,
+                    "message": "You are unbale to Edit this staff details.",
+                    "success_url": reverse('userslist')
+                })
+            else:
+                user = form.save()
+                user.user_permissions.clear()
+                user.user_permissions.add(*request.POST.getlist("user_permissions"))
+                if request.POST.get("user_roles") == "OfficeAdmin":
+                    if not user.user_permissions.filter(id__in=request.POST.getlist("user_permissions")).exists():
+                        user.user_permissions.add(Permission.objects.get(codename="OfficeAdmin"))
+
+                return JsonResponse({
+                    "error": False,
+                    "success_url": reverse('OfficeAdmin', kwargs={"pk": user.id})
+                })
+        else:
+            return JsonResponse({"error": True, "errors": form.errors})
+
+    return render(request, "user/edit.html", {
+        'form': form, 'userroles': USER_ROLES, 'permissions': permissions, 'selecteduser': selected_user})
 
 
+def user_profile_view(request, pk):
+    selecteduser = get_object_or_404(User, id=pk)
+    return render(request, "user/profile.html", {'selecteduser': selecteduser})
+
+
+def users_list_view(request):
+    list_of_users = User.objects.filter(is_admin=0)
+    return render(request, "user/list.html", {'list_of_users': list_of_users})
+
+
+def user_inactive_view(request, pk):
+    user = get_object_or_404(User, id=pk)
+    if (request.user.is_admin or (request.user.has_perm("OfficeAdmin") and
+                                  request.user.branch == user.branch)):
+        if user.is_active:
+            user.is_active = False
+        else:
+            user.is_active = True
+        user.save()
+    return HttpResponseRedirect(reverse('userslist'))
+
+
+class SearchUserView(ListView):
+    model = User
+    template_name = "user/list.html"
+    def get_queryset(self):  # new3000
+        query = self.request.GET.get("q")
+        user_list = User.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query)
+        )
+        return user_list
+    
+def view_permissions(request):
+    permissions=Permission.objects.all()
+    return render(request, "permissionn.html", {'permissions': permissions})
+
+####---------PAYMENT----------####
+
+def loan_payment(request):
+    form = PaymentForm()
+    if request.method=='POST':
+        form=PaymentForm(request.POST)
+        if form.is_valid():
+            form.save()
+    context={}
+    return render(request,'Payments/pay_loan.html',context)

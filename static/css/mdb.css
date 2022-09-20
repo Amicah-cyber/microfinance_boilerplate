@@ -2142,7 +2142,7 @@ a.text-secondary:focus {
 }
 
 .text-dark {
-    color: #212121 !important;
+    color: #212121a9 !important;
 }
 
 a.text-dark:hover,

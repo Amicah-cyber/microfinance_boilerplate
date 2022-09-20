@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<!--content goes below-->
+<main style="margin-top: 58px">
+  <div class="container pt-4">
+    <div class="card">
+        <div class="bg-dark">
+        <h4 class="card-title text-light text-center">Loan: {{loan.account_no}}</h4>
+        <h5 class="card-header text-light text-center">Client: {{loan.client.first_name}} {{loan.client.last_name}} </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Loan Amount : </label>
+                        {{loan.loan_amount}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Opening Date : </label>
+                        {{loan.opening_date }}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Approval Date : </label>
+                        {{loan.approved_date }}
+                </div>
+                 <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Issued By : </label>
+                        {{loan.loan_issued_by }}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Issue Date : </label>
+                        {{loan.loan_issued_date}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Close Date : </label>
+                        {{loan.closed_date}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Repayment Period: </label>
+                        {{loan.loan_repayment_period}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Loan Interest Type: </label>
+                        {{loan.interest_type}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Loan Interest Rate: </label>
+                        {{loan.interest_rate}}%
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Loan Interest Charged: </label>
+                        {{loan.interest_charged}}
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-lg-5 col-md-6 col-sm-6 col-xs-7 control-label">Loan Description: </label>
+                        {{loan.loanpurpose_description}}
+                </div>
+                <div class="form-group">
+                    <div class='row'>
+                        <div class="col-md-6 p-4">
+                            <a class="btn btn-dark" href="{% url 'updateloandetails' loan.id %}"> Edit Loan </a>
+                        </div>
+                        {% if user.user_roles == "Supervisor" or user.user_roles == "OfficeAdmin"  %}
+                        <div class="col-md-6 p-4">
+                            <a class="btn btn-danger" style="float:right;" href="{% url 'deleteloan' loan.id %}"> Delete Loan </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</main>
+{% endblock content %}

@@ -21,6 +21,7 @@
                     <th scope="col">Issue Date</th>
                     <th scope="col">Loanpurpose Description</th>
                     <th scope="col">Loan Amount</th>
+                    <th scope="col">Loan Interest</th>
                     <th scope="col">Status</th>
                     {% if user.user_roles == "Supervisor"  %}
                     <th scope="col">Loan Officer</th>
@@ -30,12 +31,13 @@
                 {% for loan in loans.all %}
                 <tbody>  
                     <th scope="row">{{forloop.counter}}</th>
-                    <th scope="row">{{loan.account_no}}</th>
+                    <th scope="row"><a href="{% url 'loandetails' loan.id %}">{{loan.account_no}}</a></th>
                     <td>{{loan.client.first_name}} {{loan.client.last_name}}</td>
                     <td>{{loan.opening_date}}</td>
                     <td>{{loan.loan_issued_date}}</td>
                     <td>{{loan.loanpurpose_description}}</td>
                     <td>{{loan.loan_amount}}</td>
+                    <td>{{loan.interest_charged}}</td>
                     <td>{{loan.status}}</td>
                     {% if user.user_roles == "Supervisor"  %}
                     <td>{{loan.created_by}}</td>

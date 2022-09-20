@@ -140,9 +140,8 @@ class LoanAccountForm(forms.ModelForm):
     
     class Meta:
         model = LoanAccount
-        fields = ["account_no", "interest_type", "loan_amount",'client',
-                  "loan_repayment_period", "loan_repayment_every",
-                 "loanpurpose_description"]
+        fields = ["account_no", "interest_type","interest_rate", "loan_amount",'client',
+                  "loan_repayment_period", "loan_repayment_every","loanpurpose_description"]
 
     def clean_loan_repayment_period(self):
         if self.data.get("loan_repayment_period") and self.data.get("loan_repayment_every"):
@@ -162,7 +161,7 @@ class PaymentForm(forms.ModelForm):
 
     class Meta:
         model = Payments
-        fields = [ "payment_type", "amount", "interest", "total_amount", "totalamount_in_words"]
+        fields = ["payment_id","client","payment_type","payment_method", "amount", "interest", "total_amount", "loan_account"]
 
 class ChangePasswordForm(forms.Form):
     
